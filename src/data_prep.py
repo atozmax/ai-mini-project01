@@ -128,6 +128,9 @@ def records_to_frame(payload):
     else:
         raise ValueError("input must be a transaction object or a list")
 
+    if not rows:
+        raise ValueError("no transactions in input")
+
     frame = pd.DataFrame(rows)
     missing = [c for c in FEATURE_COLUMNS if c not in frame.columns]
     if missing:
@@ -151,5 +154,7 @@ def main():
     print("Test scaled mean (first 3): ", X_test_scaled.iloc[:, :3].mean().round(4).tolist())
 
 
+print(__name__)
 if __name__ == "__main__":
+    
     main()

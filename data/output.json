@@ -1,0 +1,7 @@
+{
+  "prediction": "Legitimate",
+  "class_id": 0,
+  "probability": 0.0002,
+  "threshold": 0.33,
+  "status": "success"
+}

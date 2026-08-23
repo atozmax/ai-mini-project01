@@ -43,22 +43,28 @@ That is why some bases look “perfect at recall” and others “perfect at pre
 
 - Dataset: Machine Learning Group — ULB, [Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) (Kaggle).
 - Kernel used as a design reference: Janio Martinez Bachmann, [Credit Fraud || Dealing with Imbalanced Datasets](https://www.kaggle.com/code/janiobachmann/credit-fraud-dealing-with-imbalanced-datasets).  
-  Local copies: `research/credit-fraud-dealing-with-imbalanced-datasets.ipynb` and `refrences/credit-fraud-dealing-with-imbalanced-datasets.ipynb`.
+Local copies: `research/credit-fraud-dealing-with-imbalanced-datasets.ipynb` and `refrences/credit-fraud-dealing-with-imbalanced-datasets.ipynb`.
 
 The Kaggle kernel is **not** copied as the final solution. It supplied the *imbalanced-data playbook* used in Experiment 05: `RobustScaler` on Time/Amount, split before resampling, random 50/50 undersampling, SMOTE on train only, and a small neural net. Experiments 02–04 follow a different sklearn stacking path. Experiment 06 combines both paths.
 
 ---
 
+
+
 ## 2. Problem, data, and evaluation rules
+
+
 
 ### 2.1 Task
 
 Binary classification of credit-card transactions:
 
-| Class | Meaning | Approximate share |
-|---|---|---|
-| 0 | Legitimate | 99.83% |
-| 1 | Fraud | 0.17% (492 frauds in 284,807 rows) |
+
+| Class | Meaning    | Approximate share                  |
+| ----- | ---------- | ---------------------------------- |
+| 0     | Legitimate | 99.83%                             |
+| 1     | Fraud      | 0.17% (492 frauds in 284,807 rows) |
+
 
 Features: `Time`, `Amount`, and PCA components `V1`–`V28`. The V features are already scaled; Time and Amount are not.
 
@@ -66,11 +72,13 @@ Features: `Time`, `Amount`, and PCA components `V1`–`V28`. The V features are 
 
 A model that always predicts Legitimate is about 99.8% accurate and catches **zero** fraud. The assignment therefore forbids accuracy as the primary score.
 
-| Metric | What it answers in this project |
-|---|---|
-| **Recall** | Of the real frauds, how many did we catch? Missed fraud is expensive. |
+
+| Metric        | What it answers in this project                                                     |
+| ------------- | ----------------------------------------------------------------------------------- |
+| **Recall**    | Of the real frauds, how many did we catch? Missed fraud is expensive.               |
 | **Precision** | Of the alerts we raise, how many are real? Too many false alarms is also expensive. |
-| **F1** | Harmonic mean of precision and recall. It only stays high if **both** stay high. |
+| **F1**        | Harmonic mean of precision and recall. It only stays high if **both** stay high.    |
+
 
 The operating point we wanted, and later obtained, is high fraud F1 **without** collapsing precision.
 
@@ -80,16 +88,20 @@ The operating point we wanted, and later obtained, is high fraud F1 **without** 
 train_test_split(..., test_size=0.2, random_state=42, stratify=y)
 ```
 
-| Split | Rows | Frauds |
-|---|---|---|
-| Train | 227,845 | 394 |
-| Test  | 56,962  | 98 |
+
+| Split | Rows    | Frauds |
+| ----- | ------- | ------ |
+| Train | 227,845 | 394    |
+| Test  | 56,962  | 98     |
+
 
 Base-model stacking features for trees/KNN/RF were built with **out-of-fold** `predict_proba` (`StratifiedKFold`, 5 folds) so the meta-learner does not train on in-sample scores.
 
 Thresholds `0.3`, `0.5`, and `0.7` were always reported, as required. Extra cutoffs (F2, then F1) were chosen on **train only** and locked for test.
 
 ---
+
+
 
 ## 3. End-to-end picture
 
@@ -116,6 +128,8 @@ Raw Kaggle CSV
 
 ---
 
+
+
 ## 4. Experiment 01 — baselines
 
 **Notebook:** `notebooks/experiment01.ipynb`
@@ -133,6 +147,8 @@ Goal: a first honest pipeline on the imbalanced data.
 
 ---
 
+
+
 ## 5. Experiment 02 — classical stacking
 
 **Notebook:** `notebooks/experiment02.ipynb`
@@ -141,11 +157,13 @@ Goal: combine complementary sklearn models.
 
 Level-0 models (after randomized search):
 
-| Model | Role |
-|---|---|
-| Decision Tree | Interpretable nonlinear rules; originally `class_weight=None` |
-| KNN (`n_neighbors=3`) | Local similarity; no class weight |
-| Random Forest | Already `class_weight="balanced_subsample"` |
+
+| Model                 | Role                                                          |
+| --------------------- | ------------------------------------------------------------- |
+| Decision Tree         | Interpretable nonlinear rules; originally `class_weight=None` |
+| KNN (`n_neighbors=3`) | Local similarity; no class weight                             |
+| Random Forest         | Already `class_weight="balanced_subsample"`                   |
+
 
 Stacking procedure:
 
@@ -161,6 +179,8 @@ Best meta RF (F1 search): `n_estimators=300`, `max_depth=20`, `min_samples_leaf=
 
 ---
 
+
+
 ## 6. Experiment 03 — thresholds
 
 **Notebook:** `notebooks/experimnet03.ipynb` (filename typo kept)
@@ -169,12 +189,14 @@ Goal: treat `0.5` as a default, not a law.
 
 The assignment asks for `0.3 / 0.5 / 0.7`. We also swept a fine grid.
 
-| Rule | Threshold | Precision | Recall | F1 | TP / FN / FP |
-|---|---|---|---|---|---|
-| F2 (recall-heavy) | 0.25 | 0.83 | 0.87 | 0.85 | 85 / 13 / 17 |
-| **F1 (balanced)** | **0.40** | **0.90** | **0.83** | **0.86** | **81 / 17 / 9** |
-| Required | 0.50 | 0.91 | 0.83 | 0.87 | 81 / 17 / 8 |
-| Required | 0.70 | 0.97 | 0.74 | 0.84 | 73 / 25 / 2 |
+
+| Rule              | Threshold | Precision | Recall   | F1       | TP / FN / FP    |
+| ----------------- | --------- | --------- | -------- | -------- | --------------- |
+| F2 (recall-heavy) | 0.25      | 0.83      | 0.87     | 0.85     | 85 / 13 / 17    |
+| **F1 (balanced)** | **0.40**  | **0.90**  | **0.83** | **0.86** | **81 / 17 / 9** |
+| Required          | 0.50      | 0.91      | 0.83     | 0.87     | 81 / 17 / 8     |
+| Required          | 0.70      | 0.97      | 0.74     | 0.84     | 73 / 25 / 2     |
+
 
 Pushing recall toward 95% by lowering the cutoff **failed**: even at `t=0.01` train recall only reached about 92%, and test precision collapsed (about 210 extra false positives).
 
@@ -183,6 +205,8 @@ The 13 frauds missed at `t=0.25` sat near `(0, 0)` for every base model. Stackin
 **Lesson.** Threshold tuning is part of the model. F1 (or F2) must be chosen on train/validation, then frozen.
 
 ---
+
+
 
 ## 7. Experiment 04 — F1-oriented sklearn stack
 
@@ -197,17 +221,21 @@ Changes:
 - Meta RF **without** class weights (weights had destroyed precision).
 - Pick the highest train **F1** cutoff.
 
-| Setting | Threshold | Precision | Recall | F1 |
-|---|---|---|---|---|
-| Exp 03 stacker, F2 | 0.25 | 0.83 | 0.87 | 0.85 |
-| Exp 03 stacker, F1 | 0.40 | 0.90 | 0.83 | 0.86 |
-| Exp 04 new DT + meta | 0.30 | 0.86 | 0.85 | 0.85 |
+
+| Setting              | Threshold | Precision | Recall | F1   |
+| -------------------- | --------- | --------- | ------ | ---- |
+| Exp 03 stacker, F2   | 0.25      | 0.83      | 0.87   | 0.85 |
+| Exp 03 stacker, F1   | 0.40      | 0.90      | 0.83   | 0.86 |
+| Exp 04 new DT + meta | 0.30      | 0.86      | 0.85   | 0.85 |
+
 
 The balanced tree raised OOF recall but, used alone at 0.5, precision was unusable (~0.04). The meta-model recovered precision. It did **not** beat the original stacker on F1. The practical sklearn operating point remained: **original stacker at 0.40–0.50**.
 
 Skipped on purpose: 50/50 undersampling, dropping fraud outliers, and SMOTE (not in `requirements.txt` at that stage).
 
 ---
+
+
 
 ## 8. Experiment 05 — deep specialists (Kaggle recipe)
 
@@ -224,36 +252,44 @@ Goal: add neural nets that *specialize*, instead of one net that compromises.
 4. Show a 50/50 **random undersample** (too small for a deep net; not used for the six models).
 5. **SMOTE** the fit split only (`sampling_strategy="minority"`). Never resample the test set.
 
+
+
 ### 8.2 Six independent Keras runs
 
 Same architecture: `256 → 128 → 64 → 32 → 1` (ReLU, batch norm, dropout, sigmoid).  
 Each run saved the epoch that maximized **one** metric on **one** split:
 
-| File | Optimized for |
-|---|---|
-| `nn_f1_train.keras` | train F1 |
-| `nn_f1_val.keras` | validation F1 |
-| `nn_recall_train.keras` | train recall |
-| `nn_recall_val.keras` | validation recall |
-| `nn_precision_train.keras` | train precision |
-| `nn_precision_val.keras` | validation precision |
+
+| File                       | Optimized for        |
+| -------------------------- | -------------------- |
+| `nn_f1_train.keras`        | train F1             |
+| `nn_f1_val.keras`          | validation F1        |
+| `nn_recall_train.keras`    | train recall         |
+| `nn_recall_val.keras`      | validation recall    |
+| `nn_precision_train.keras` | train precision      |
+| `nn_precision_val.keras`   | validation precision |
+
 
 Precision selection required recall ≥ 0.40 so a model could not “win” by predicting almost no fraud.
 
 ### 8.3 Honest holdout (Experiment 05’s own test fold, 98 frauds)
 
-| Model | Threshold | Precision | Recall | F1 | TP / FN / FP |
-|---|---|---|---|---|---|
-| `nn_precision_train` | 0.90 | **0.96** | 0.70 | **0.81** | 69 / 29 / 3 |
-| `nn_f1_val` | 0.91 | 0.93 | 0.68 | 0.79 | 67 / 31 / 5 |
-| `nn_f1_train` | 0.95 | 0.92 | 0.68 | 0.78 | 67 / 31 / 6 |
-| `nn_precision_val` | 0.80 | 0.93 | 0.67 | 0.78 | 66 / 32 / 5 |
-| `nn_recall_train` | 0.05 | 0.27 | **0.83** | 0.41 | 81 / 17 / 217 |
-| `nn_recall_val` | 0.05 | 0.25 | **0.83** | 0.39 | 81 / 17 / 239 |
+
+| Model                | Threshold | Precision | Recall   | F1       | TP / FN / FP  |
+| -------------------- | --------- | --------- | -------- | -------- | ------------- |
+| `nn_precision_train` | 0.90      | **0.96**  | 0.70     | **0.81** | 69 / 29 / 3   |
+| `nn_f1_val`          | 0.91      | 0.93      | 0.68     | 0.79     | 67 / 31 / 5   |
+| `nn_f1_train`        | 0.95      | 0.92      | 0.68     | 0.78     | 67 / 31 / 6   |
+| `nn_precision_val`   | 0.80      | 0.93      | 0.67     | 0.78     | 66 / 32 / 5   |
+| `nn_recall_train`    | 0.05      | 0.27      | **0.83** | 0.41     | 81 / 17 / 217 |
+| `nn_recall_val`      | 0.05      | 0.25      | **0.83** | 0.39     | 81 / 17 / 239 |
+
 
 This table is the important one for the neural nets. Precision specialists are conservative and precise. Recall specialists catch more fraud and drown the operator in false positives. **That diversity is useful only if a later model can choose among them.**
 
 ---
+
+
 
 ## 9. Experiment 06 — heterogeneous stack (final)
 
@@ -268,13 +304,15 @@ From Experiments 02–04 (OOF on the sklearn split):
 - `pred_dt` — balanced decision tree  
 - `pred_knn` — KNN  
 - `pred_rf` — random forest  
-- `pred_meta_f1` — Experiment 04 Random Forest stacker  
+- `pred_meta_f1` — Experiment 04 Random Forest stacker
 
 From Experiment 05 (frozen Keras weights, numpy inference, no TensorFlow required):
 
 - `nn_f1_train`, `nn_f1_val`  
 - `nn_recall_train`, `nn_recall_val`  
-- `nn_precision_train`, `nn_precision_val`  
+- `nn_precision_train`, `nn_precision_val`
+
+
 
 ### 9.2 Meta-learner
 
@@ -291,6 +329,8 @@ Linear(32 → 1)  → sigmoid  (BCE with logits)
 - Early stopping on validation loss.  
 - Final cutoff chosen by **train fraud F1** (`t = 0.33`).
 
+
+
 ### 9.3 Test results (sklearn split, 98 frauds)
 
 This is the result that matches the target operating point:
@@ -302,13 +342,15 @@ This is the result that matches the target operating point:
        Fraud       0.91      0.95      0.93        98
 ```
 
-| Setting | Threshold | Precision | Recall | F1 | TP | FN | FP |
-|---|---|---|---|---|---|---|---|
-| Exp 03 stacker F2 | 0.25 | 0.83 | 0.87 | 0.85 | 85 | 13 | 17 |
-| Exp 03 stacker F1 | 0.40 | 0.90 | 0.83 | 0.86 | 81 | 17 | 9 |
-| Exp 04 KNN | 0.50 | 0.91 | 0.83 | 0.87 | 81 | 17 | 8 |
-| Exp 04 meta RF | 0.30 | 0.86 | 0.85 | 0.85 | 83 | 15 | 14 |
-| **Exp 06 PyTorch stack** | **0.33** | **0.91** | **0.95** | **0.93** | **93** | **5** | **9** |
+
+| Setting                  | Threshold | Precision | Recall   | F1       | TP     | FN    | FP    |
+| ------------------------ | --------- | --------- | -------- | -------- | ------ | ----- | ----- |
+| Exp 03 stacker F2        | 0.25      | 0.83      | 0.87     | 0.85     | 85     | 13    | 17    |
+| Exp 03 stacker F1        | 0.40      | 0.90      | 0.83     | 0.86     | 81     | 17    | 9     |
+| Exp 04 KNN               | 0.50      | 0.91      | 0.83     | 0.87     | 81     | 17    | 8     |
+| Exp 04 meta RF           | 0.30      | 0.86      | 0.85     | 0.85     | 83     | 15    | 14    |
+| **Exp 06 PyTorch stack** | **0.33**  | **0.91**  | **0.95** | **0.93** | **93** | **5** | **9** |
+
 
 Relative to the best sklearn stacker (F1 ≈ 0.86–0.87):
 
@@ -326,15 +368,19 @@ The honest neural-net holdout remains Experiment 05’s own table (best F1 ≈ 0
 
 ---
 
+
+
 ## 10. Why mixing “precision models” and “recall models” works
 
 Each base learner fails differently.
 
-| Specialist | Typical behavior | Failure mode |
-|---|---|---|
-| Precision / F1 nets, KNN | Alert only when sure | Misses unusual frauds |
+
+| Specialist                 | Typical behavior       | Failure mode                      |
+| -------------------------- | ---------------------- | --------------------------------- |
+| Precision / F1 nets, KNN   | Alert only when sure   | Misses unusual frauds             |
 | Recall nets, balanced tree | Alert on weak evidence | Many legitimate customers blocked |
-| Random forest | Strong middle ground | Still misses the same hard tail |
+| Random forest              | Strong middle ground   | Still misses the same hard tail   |
+
 
 The meta-learner sees a 10-dimensional vote. Empirically:
 
@@ -346,31 +392,39 @@ That pattern cannot be expressed by a single threshold on a single model. It *ca
 
 ---
 
+
+
 ## 11. Comparison to the Kaggle reference kernel
 
-| Topic | Kaggle kernel | This project |
-|---|---|---|
-| Scaling | `RobustScaler` on Time and Amount | Same in Exp 05; `StandardScaler` in sklearn pipelines (01–04) |
-| Split | Stratified K-fold, original imbalanced test | Stratified 80/20 (`random_state=42`) for sklearn; K-fold for Exp 05 |
-| Undersampling | 50/50 subsample for classical models | Shown in Exp 05, **not** used as the final sklearn path (information loss) |
-| Oversampling | SMOTE during / after split | SMOTE on the Exp 05 fit split only |
-| Models | LogReg, KNN, SVM, DT, small Keras net | DT, KNN, RF, six deep nets, RF stacker, PyTorch stacker |
-| Metric | Accuracy on balanced data (kernel warning) | Precision / recall / F1 on **imbalanced** test |
-| Combination | Compare undersample vs SMOTE nets separately | **Stack** ML + DL specialists |
+
+| Topic         | Kaggle kernel                                | This project                                                               |
+| ------------- | -------------------------------------------- | -------------------------------------------------------------------------- |
+| Scaling       | `RobustScaler` on Time and Amount            | Same in Exp 05; `StandardScaler` in sklearn pipelines (01–04)              |
+| Split         | Stratified K-fold, original imbalanced test  | Stratified 80/20 (`random_state=42`) for sklearn; K-fold for Exp 05        |
+| Undersampling | 50/50 subsample for classical models         | Shown in Exp 05, **not** used as the final sklearn path (information loss) |
+| Oversampling  | SMOTE during / after split                   | SMOTE on the Exp 05 fit split only                                         |
+| Models        | LogReg, KNN, SVM, DT, small Keras net        | DT, KNN, RF, six deep nets, RF stacker, PyTorch stacker                    |
+| Metric        | Accuracy on balanced data (kernel warning)   | Precision / recall / F1 on **imbalanced** test                             |
+| Combination   | Compare undersample vs SMOTE nets separately | **Stack** ML + DL specialists                                              |
+
 
 We kept the kernel’s preprocessing and resampling ideas, rejected accuracy as a headline, and went further by stacking heterogeneous specialists.
 
 ---
 
+
+
 ## 12. What we would not do again
 
-1. **Optimize recall alone** on an imbalanced test set. Train recall ≥ 95% produced thousands of false positives.  
-2. **`class_weight="balanced"` on the meta-learner.** It re-introduced the recall flood that the precision models had avoided.  
-3. **Random 50/50 undersampling as the only training set** for a high-capacity net. It throws away almost all legitimate structure.  
-4. **Dropping “outlier” frauds** (IQR on V10/V12/V14 in the kernel). Those tails are often the hard frauds we still miss.  
+1. **Optimize recall alone** on an imbalanced test set. Train recall ≥ 95% produced thousands of false positives.
+2. `class_weight="balanced"` **on the meta-learner.** It re-introduced the recall flood that the precision models had avoided.
+3. **Random 50/50 undersampling as the only training set** for a high-capacity net. It throws away almost all legitimate structure.
+4. **Dropping “outlier” frauds** (IQR on V10/V12/V14 in the kernel). Those tails are often the hard frauds we still miss.
 5. **Judging models by accuracy.**
 
 ---
+
+
 
 ## 13. Final recommendation
 
@@ -387,29 +441,3 @@ We kept the kernel’s preprocessing and resampling ideas, rejected accuracy as 
 
 ---
 
-## 14. Artifact map
-
-| Path | Content |
-|---|---|
-| `notebooks/experiment01.ipynb` | DT / KNN / Logistic baselines |
-| `notebooks/experiment02.ipynb` | OOF stacking, RF meta-search |
-| `notebooks/experimnet03.ipynb` | Thresholds 0.3 / 0.5 / 0.7, F2 vs F1 |
-| `notebooks/experiment04.ipynb` | Balanced tree, F1-oriented meta RF |
-| `notebooks/experiment05/experiment05.ipynb` | SMOTE + six Keras specialists |
-| `notebooks/experiment05_models/` | `.keras` weights, `manifest.json` |
-| `notebooks/experiment06.ipynb` | Heterogeneous PyTorch stack |
-| `_data/stacking_*_exp04.csv` / `_exp06.csv` | Meta-feature tables |
-| `_models/` | Pickled sklearn models and PyTorch checkpoint |
-| `research/` and `refrences/` | Kaggle imbalanced-data kernel |
-
----
-
-## 15. References
-
-1. Machine Learning Group — ULB. *Credit Card Fraud Detection*. Kaggle. https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud  
-2. Janio Martinez Bachmann. *Credit Fraud || Dealing with Imbalanced Datasets*. Kaggle Notebook. https://www.kaggle.com/code/janiobachmann/credit-fraud-dealing-with-imbalanced-datasets  
-3. David H. Wolpert. “Stacked Generalization.” *Neural Networks* 5(2), 1992, 241–259.  
-4. Leo Breiman. “Stacked Regressions.” *Machine Learning* 24, 1996, 49–64.  
-5. Nitesh V. Chawla, Kevin W. Bowyer, Lawrence O. Hall, and W. Philip Kegelmeyer. “SMOTE: Synthetic Minority Over-sampling Technique.” *JAIR* 16, 2002, 321–357.  
-6. Scikit-learn documentation: *Ensemble methods — Stacked generalization*. https://scikit-learn.org/stable/modules/ensemble.html#stacked-generalization  
-7. Course brief: `notebooks/Project-Definition-v2-fraud.ipynb` (stratified split, F1/precision/recall, thresholds 0.3 / 0.5 / 0.7).
