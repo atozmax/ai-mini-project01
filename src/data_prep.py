@@ -103,6 +103,7 @@ def transform_features(scaler, X):
 
 
 def fit_time_amount_scalers(frame):
+    """Fit RobustScalers on Time and Amount. Pass the train split only."""
     amount_scaler = RobustScaler().fit(frame[["Amount"]])
     time_scaler = RobustScaler().fit(frame[["Time"]])
     return amount_scaler, time_scaler
@@ -154,7 +155,5 @@ def main():
     print("Test scaled mean (first 3): ", X_test_scaled.iloc[:, :3].mean().round(4).tolist())
 
 
-print(__name__)
 if __name__ == "__main__":
-    
     main()

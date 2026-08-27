@@ -404,7 +404,7 @@ def main():
             f"F1={m['f1']:.4f}  FP={m['fp']} FN={m['fn']}"
         )
 
-    amount_scaler, time_scaler = dp.fit_time_amount_scalers(df)
+    amount_scaler, time_scaler = dp.fit_time_amount_scalers(X_train)
     stacker, threshold, ckpt_path = load_stacker_checkpoint()
     print("\nLoaded stacker", ckpt_path, "threshold", threshold)
 

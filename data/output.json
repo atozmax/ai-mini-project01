@@ -1,7 +1,70 @@
 {
-  "prediction": "Legitimate",
-  "class_id": 0,
-  "probability": 0.0002,
-  "threshold": 0.33,
+  "predictions": [
+    {
+      "prediction": "Legitimate",
+      "class_id": 0,
+      "probability": 0.0,
+      "threshold": 0.33,
+      "status": "success",
+      "index": 0
+    },
+    {
+      "prediction": "Fraud",
+      "class_id": 1,
+      "probability": 0.9739,
+      "threshold": 0.33,
+      "status": "success",
+      "index": 1
+    },
+    {
+      "prediction": "Legitimate",
+      "class_id": 0,
+      "probability": 0.0,
+      "threshold": 0.33,
+      "status": "success",
+      "index": 2
+    },
+    {
+      "prediction": "Fraud",
+      "class_id": 1,
+      "probability": 0.814,
+      "threshold": 0.33,
+      "status": "success",
+      "index": 3
+    },
+    {
+      "prediction": "Legitimate",
+      "class_id": 0,
+      "probability": 0.0,
+      "threshold": 0.33,
+      "status": "success",
+      "index": 4
+    },
+    {
+      "prediction": "Fraud",
+      "class_id": 1,
+      "probability": 0.9421,
+      "threshold": 0.33,
+      "status": "success",
+      "index": 5
+    },
+    {
+      "prediction": "Legitimate",
+      "class_id": 0,
+      "probability": 0.0001,
+      "threshold": 0.33,
+      "status": "success",
+      "index": 6
+    },
+    {
+      "prediction": "Fraud",
+      "class_id": 1,
+      "probability": 0.9055,
+      "threshold": 0.33,
+      "status": "success",
+      "index": 7
+    }
+  ],
+  "count": 8,
   "status": "success"
 }
