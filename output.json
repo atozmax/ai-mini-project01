@@ -1,7 +1,0 @@
-{
-  "prediction": "Fraud",
-  "class_id": 1,
-  "probability": 0.9739,
-  "threshold": 0.33,
-  "status": "success"
-}
